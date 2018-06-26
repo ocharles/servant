@@ -6,7 +6,8 @@ packages: servant/
   servant-server/
   doc/tutorial/
 
-  servant-machines
+  servant-machines/
+  servant-conduit/
 
   -- doc/cookbook/*/*.cabal
 
