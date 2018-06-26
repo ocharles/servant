@@ -20,6 +20,8 @@ import GHC.Generics
 import Network.HTTP.Client (newManager, defaultManagerSettings)
 import Servant.API
 import Servant.Client
+import Servant.Types.SourceT (foreach)
+import Servant.Types.Codensity (Codensity)
 ```
 
 Also, we need examples for some domain specific data types:
@@ -214,18 +216,22 @@ getClients clientEnv
 
 ## Querying Streaming APIs.
 
+**FIXME**
 Consider the following streaming API type:
 
 ``` haskell
-type StreamAPI = "positionStream" :> StreamGet NewlineFraming JSON (ResultStream Position)
+type StreamAPI = "positionStream" :> StreamGet NewlineFraming JSON (SourceIO Position)
 ```
 
-Note that when we declared an API to serve, we specified a `StreamGenerator` as a producer of streams. Now we specify our result type as a `ResultStream`. With types that can be used both ways, if appropriate adaptors are written (in the form of `ToStreamGenerator` and `BuildFromStream` instances), then this asymmetry isn't necessary. Otherwise, if you want to share the same API across clients and servers, you can parameterize it like so:
+**FIXME** Note that when we declared an API to serve, we specified a `SourceIO` as a
+producer of streams. Now we specify our result type as a `SourceIO`. With types
+that can be used both ways, if appropriate adaptors are written (in the form of
+`ToSourceIO` and `BuildFromStream` instances), then this asymmetry isn't
+necessary. Otherwise, if you want to share the same API across clients and
+servers, you can parameterize it like so:
 
 ``` haskell ignore
-type StreamAPI f = "positionStream" :> StreamGet NewlineFraming JSON (f Position)
-type ServerStreamAPI = StreamAPI StreamGenerator
-type ClientStreamAPI = StreamAPI ResultStream
+type StreamAPI = "positionStream" :> StreamGet NewlineFraming JSON (SourceIO Position)
 ```
 
 In any case, here's how we write a function to query our API:
@@ -234,24 +240,26 @@ In any case, here's how we write a function to query our API:
 streamAPI :: Proxy StreamAPI
 streamAPI = Proxy
 
-posStream :: ClientM (ResultStream Position)
-
+posStream :: ClientM (Codensity IO (SourceIO Position))
 posStream = client streamAPI
 ```
 
-And here's how to just print out all elements from a `ResultStream`, to give some idea of how to work with them.
+And here's how to just print out all elements from a `SourceIO`, to give
+some idea of how to work with them.
+
+**FIXME** explain joinCodensitySourceT
 
 ``` haskell
-printResultStream :: Show a => ResultStream a -> IO ()
-printResultStream (ResultStream k) = k $ \getResult ->
-       let loop = do
-            r <- getResult
-            case r of
-                Nothing -> return ()
-                Just x -> print x >> loop
-       in loop
+printSourceIO :: Show a => ClientEnv -> ClientM (Codensity IO (SourceIO a)) -> IO ()
+printSourceIO env c = withClientM c env $ \e -> case e of
+    Left err -> putStrLn $ "Error: " ++ show err
+    Right rs -> foreach fail print rs
 ```
 
-The stream is parsed and provided incrementally. So the above loop prints out each result as soon as it is received on the stream, rather than waiting until they are all available to print them at once.
+The stream is parsed and provided incrementally. So the above loop prints out
+each result as soon as it is received on the stream, rather than waiting until
+they are all available to print them at once.
+
+**FIXME** mention `servant-machines`, `servant-conduit`...
 
 You now know how to use **servant-client**!
