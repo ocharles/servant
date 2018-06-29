@@ -1,0 +1,35 @@
+name:                cookbook-basic-streaming
+version:             2.1
+synopsis:            Streaming in servant without streaming libs
+homepage:            http://haskell-servant.readthedocs.org/
+license:             BSD3
+license-file:        ../../../servant/LICENSE
+author:              Servant Contributors
+maintainer:          haskell-servant-maintainers@googlegroups.com
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files:
+  Pagination.lhs
+  dummy/Pagination.lhs
+tested-with:         GHC==7.8.4, GHC==7.10.3, GHC==8.0.2, GHC==8.2.2, GHC==8.4.3
+
+executable cookbook-basic-streaming
+  main-is:             Streaming.lhs
+  build-tool-depends:  markdown-unlit:markdown-unlit
+  default-language:    Haskell2010
+  ghc-options:         -Wall -pgmL markdown-unlit -threaded -rtsopts
+
+  if impl(ghc >= 8.0)
+    hs-source-dirs: .
+    build-depends:       base >= 4.8 && <4.12
+                       , aeson
+                       , bytestring
+                       , servant
+                       , servant-server
+                       , servant-client
+                       , http-client
+                       , wai
+                       , warp
+  else
+    hs-source-dirs: dummy
+    build-depends: base

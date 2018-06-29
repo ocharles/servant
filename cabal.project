@@ -13,6 +13,7 @@ packages: servant/
   -- doc/cookbook/*/*.cabal
 
   doc/cookbook/basic-auth
+  doc/cookbook/basic-streaming
   doc/cookbook/db-postgres-pool
   doc/cookbook/db-sqlite-simple
   doc/cookbook/file-upload
