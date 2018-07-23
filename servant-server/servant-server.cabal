@@ -1,5 +1,5 @@
 name:                servant-server
-version:             0.14
+version:             0.14.1
 synopsis:            A family of combinators for defining webservices APIs and serving them
 description:
   A family of combinators for defining webservices APIs and serving them
@@ -22,13 +22,10 @@ category:            Servant, Web
 build-type:          Custom
 cabal-version:       >=1.10
 tested-with:
-  GHC==7.8.4
-  GHC==7.10.3
   GHC==8.0.2
   GHC==8.2.2
   GHC==8.4.3
 extra-source-files:
-  include/*.h
   CHANGELOG.md
   README.md
 
@@ -47,6 +44,7 @@ library
     Servant
     Servant.Server
     Servant.Server.Experimental.Auth
+    Servant.Server.Generic
     Servant.Server.Internal
     Servant.Server.Internal.BasicAuth
     Servant.Server.Internal.Context
@@ -54,6 +52,10 @@ library
     Servant.Server.Internal.Router
     Servant.Server.Internal.RoutingApplication
     Servant.Server.Internal.ServantErr
+    Servant.Server.StaticFiles
+
+  -- deprecated
+  exposed-modules:
     Servant.Utils.StaticFiles
 
   -- Bundled with GHC: Lower bound to not force re-installs
@@ -75,7 +77,7 @@ library
 
   -- Servant dependencies
   build-depends:
-      servant            == 0.14.*
+      servant            >= 0.14.1 && <0.15
 
   -- Other dependencies: Lower bound around what is in the latest Stackage LTS.
   -- Here can be exceptions if we really need features from the newer versions.
@@ -100,10 +102,7 @@ library
 
   hs-source-dirs: src
   default-language: Haskell2010
-  ghc-options: -Wall
-  if impl(ghc >= 8.0)
-    ghc-options: -Wno-redundant-constraints
-  include-dirs: include
+  ghc-options: -Wall -Wno-redundant-constraints
 
 executable greet
   main-is: greet.hs
@@ -133,12 +132,12 @@ test-suite spec
       Servant.Server.Internal.ContextSpec
       Servant.Server.Internal.RoutingApplicationSpec
       Servant.Server.RouterSpec
+      Servant.Server.StaticFilesSpec
       Servant.Server.StreamingSpec
       Servant.Server.UsingContextSpec
       Servant.Server.UsingContextSpec.TestCombinators
       Servant.HoistSpec
       Servant.ServerSpec
-      Servant.Utils.StaticFilesSpec
 
   -- Dependencies inherited from the library. No need to specify bounds.
   build-depends:
@@ -176,7 +175,7 @@ test-suite doctests
   build-depends:
       base
     , servant-server
-    , doctest >= 0.15.0 && <0.16
+    , doctest >= 0.16.0 && <0.17
   type: exitcode-stdio-1.0
   main-is: test/doctests.hs
   buildable: True
@@ -184,4 +183,3 @@ test-suite doctests
   ghc-options: -Wall -threaded
   if impl(ghc >= 8.2)
     x-doctest-options: -fdiagnostics-color=never
-  include-dirs: include
